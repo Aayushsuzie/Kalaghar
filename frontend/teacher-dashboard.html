@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>KalaGhar – Teacher Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <script>
+      // Check if user is logged in
+      const token = localStorage.getItem("authToken");
+      const userRole = localStorage.getItem("userRole");
+      
+      if (!token) {
+        window.location.href = "login.html";
+      }
+      
+      // Verify role matches
+      if (userRole !== "teacher") {
+        // If not a teacher, redirect to appropriate dashboard or login
+        if (userRole === "student") {
+          window.location.href = "student-dashboard.html";
+        } else {
+          window.location.href = "login.html";
+        }
+      }
+    </script>
+
+    <header class="navbar">
+      <div class="logo">KalaGhar</div>
+      <div class="nav-actions">
+        <a href="index.html" class="btn-link">Home</a>
+        <button id="logout-btn" class="btn-primary small">Logout</button>
+      </div>
+    </header>
+
+    <main class="section">
+      <h1>Welcome to Your Teacher Dashboard</h1>
+      <p>You are logged in as a teacher.</p>
+      <div id="user-info" style="margin-top: 20px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+        <p><strong>Role:</strong> <span id="display-role">Teacher</span></p>
+        <p><strong>Status:</strong> Logged in</p>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>&copy; <span id="year"></span> Kalaghar. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+      // Logout functionality
+      document.getElementById("logout-btn")?.addEventListener("click", () => {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userRole");
+        window.location.href = "login.html";
+      });
+    </script>
+  </body>
+</html>

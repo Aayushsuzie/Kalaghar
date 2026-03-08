@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>KalaGhar – Log in</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="logo">KalaGhar</div>
+      <div class="nav-actions">
+        <a href="index.html" class="btn-link">Home</a>
+        <a href="signup.html" class="btn-primary small">Sign up</a>
+      </div>
+    </header>
+
+    <main class="section auth-section-page">
+      <h2>Log in</h2>
+      <form id="login-form" class="form">
+        <label>
+          Email
+          <input type="email" name="email" required />
+        </label>
+        <label>
+          Password
+          <input type="password" name="password" required />
+        </label>
+        <button type="submit" class="btn-primary">Login</button>
+        <p class="form-message" id="login-message"></p>
+      </form>
+    </main>
+
+    <footer class="footer">
+      <p>&copy; <span id="year"></span> Kalaghar. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+  </html>
+
+

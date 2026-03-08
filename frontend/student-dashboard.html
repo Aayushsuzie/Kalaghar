@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>KalaGhar – Student Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <script>
+      // Check if user is logged in
+      const token = localStorage.getItem("authToken");
+      const userRole = localStorage.getItem("userRole");
+      
+      if (!token) {
+        window.location.href = "login.html";
+      }
+      
+      // Verify role matches
+      if (userRole !== "student") {
+        // If not a student, redirect to appropriate dashboard or login
+        if (userRole === "teacher") {
+          window.location.href = "teacher-dashboard.html";
+        } else {
+          window.location.href = "login.html";
+        }
+      }
+    </script>
+
+    <header class="navbar">
+      <div class="logo">KalaGhar</div>
+      <div class="nav-actions">
+        <a href="index.html" class="btn-link">Home</a>
+        <button id="logout-btn" class="btn-primary small">Logout</button>
+      </div>
+    </header>
+
+    <main class="section">
+      <div class="dashboard-header">
+        <h1 class="dashboard-title">Explore skills</h1>
+        <p class="dashboard-subtitle">
+          Choose a category to see the skills inside it.
+        </p>
+      </div>
+
+      <section class="skill-browser" aria-label="Skills categories">
+        <div class="skill-browser__col">
+          <h2 class="skill-browser__title">Categories</h2>
+          <div id="category-list" class="category-list" role="list"></div>
+        </div>
+
+        <div class="skill-browser__col">
+          <h2 class="skill-browser__title">
+            <span id="subcategory-title">Sub-categories</span>
+          </h2>
+          <div id="subcategory-list" class="subcategory-grid" role="list"></div>
+          <p id="subcategory-hint" class="dashboard-hint">
+            Select a category to view sub-categories.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>&copy; <span id="year"></span> Kalaghar. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+      const categoryListEl = document.getElementById("category-list");
+      const subcategoryListEl = document.getElementById("subcategory-list");
+      const subcategoryTitleEl = document.getElementById("subcategory-title");
+      const subcategoryHintEl = document.getElementById("subcategory-hint");
+
+      let SKILL_CATEGORIES = [];
+
+      function setActiveCategory(categoryId) {
+        const category = SKILL_CATEGORIES.find((c) => c.categoryId === categoryId);
+        if (!category) return;
+
+        // Update active styles
+        document.querySelectorAll("[data-category-id]").forEach((btn) => {
+          const isActive = btn.getAttribute("data-category-id") === categoryId;
+          btn.classList.toggle("category-btn--active", isActive);
+          btn.setAttribute("aria-pressed", String(isActive));
+        });
+
+        // Render subcategories
+        subcategoryTitleEl.textContent = `Sub-categories • ${category.categoryName}`;
+        subcategoryHintEl.style.display = "none";
+
+        subcategoryListEl.innerHTML = "";
+        category.skills.forEach((skill) => {
+          const item = document.createElement("button");
+          item.type = "button";
+          item.className = "subcategory-card";
+          item.setAttribute("role", "listitem");
+          item.textContent = `${skill.skillName} (${skill.count})`;
+          item.addEventListener("click", () => {
+            // For now just confirm selection; later we can navigate to a skill list page.
+            alert(`Selected: ${category.categoryName} → ${skill.skillName}`);
+          });
+          subcategoryListEl.appendChild(item);
+        });
+      }
+
+      async function loadSkillCategories() {
+        categoryListEl.innerHTML = "";
+        subcategoryListEl.innerHTML = "";
+        subcategoryTitleEl.textContent = "Sub-categories";
+        subcategoryHintEl.textContent = "Loading categories...";
+        subcategoryHintEl.style.display = "block";
+
+        try {
+          const res = await fetch("http://localhost:5000/api/classes/skills-summary");
+          const json = await res.json();
+
+          if (!res.ok || json.success === false) {
+            throw new Error(json.message || "Could not load skills");
+          }
+
+          SKILL_CATEGORIES = json.data || [];
+
+          if (!SKILL_CATEGORIES.length) {
+            subcategoryHintEl.textContent =
+              "No classes have been posted yet. Check back soon!";
+            return;
+          }
+
+          SKILL_CATEGORIES.forEach((cat) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "category-btn";
+            btn.textContent = cat.categoryName;
+            btn.setAttribute("role", "listitem");
+            btn.setAttribute("data-category-id", cat.categoryId);
+            btn.setAttribute("aria-pressed", "false");
+            btn.addEventListener("click", () => setActiveCategory(cat.categoryId));
+            categoryListEl.appendChild(btn);
+          });
+
+          // Optionally select the first category by default
+          setActiveCategory(SKILL_CATEGORIES[0].categoryId);
+        } catch (error) {
+          console.error("Error loading skills summary:", error);
+          subcategoryHintEl.textContent =
+            "There was a problem loading available skills. Please try again later.";
+        }
+      }
+
+      // Logout functionality
+      document.getElementById("logout-btn")?.addEventListener("click", () => {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userRole");
+        window.location.href = "login.html";
+      });
+
+      // Load categories when the page is ready
+      loadSkillCategories();
+    </script>
+  </body>
+</html>

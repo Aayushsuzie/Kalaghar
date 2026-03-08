@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Kala-Ghar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="logo">KalaGhar</div>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-link">Log in</a>
+        <a href="signup.html" class="btn-primary small">Sign up</a>
+      </div>
+    </header>
+
+    <main>
+      <section id="home" class="hero">
+        <div class="hero-content">
+          <h1 class="hero-title">
+            Learn traditional handicraft skills<br />
+            from artisans across Nepal
+          </h1>
+          <p class="hero-subtitle">
+            KalaGhar connects you with master craftsmen in wood, metal, fabric, and more
+            so these skills can live on in the next generation.
+          </p>
+
+          <form class="search-bar" onsubmit="return false;">
+            <input
+              type="text"
+              class="search-input"
+              placeholder="What craft would you like to learn? "
+            />
+            <button type="submit" class="search-button">
+              Search
+            </button>
+          </form>
+
+          <div class="trending">
+            <span class="trending-label">Trending:</span>
+            <button class="chip">Wood carving</button>
+            <button class="chip">Thangka painting</button>
+            <button class="chip">Handloom weaving</button>
+            <button class="chip">Metal repoussé</button>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat">
+              <div class="stat-icon diamond green"></div>
+              <p><span class="stat-number">500+</span> artisan mentors</p>
+            </div>
+            <div class="stat">
+              <div class="stat-icon diamond orange"></div>
+              <p><span class="stat-number">40+</span> traditional skills</p>
+            </div>
+            <div class="stat">
+              <div class="stat-icon diamond mustard"></div>
+              <p><span class="stat-number">4.9/5</span> learner satisfaction</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>&copy; <span id="year"></span> Kalaghar. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
+
+
