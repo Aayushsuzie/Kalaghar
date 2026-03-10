@@ -1,3 +1,6 @@
+
+// models/User.js - Updated User Model
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -29,7 +32,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Password is required'],
     minlength: [6, 'Password must be at least 6 characters'],
-    select: false  // Don't return password in queries
+    select: false
+  },
+
+
+
+  phone: {
+  type: String,
+  required: [true, "Phone number is required"],
+  match: [/^9[78]\d{8}$/, "Please enter a valid Nepal mobile number"]
   },
 
   role: {
@@ -38,10 +49,34 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Role is required']
   },
 
+  
+  // LOCATION - Updated Structure
+  
   location: {
-    type: String,
-    required: false,
-    trim: true
+    address: {
+      type: String,
+      required: false,
+      trim: true
+    },
+    city: {
+      type: String,
+      required: false,
+      trim: true
+    },
+    coordinates: {
+      latitude: {
+        type: Number,
+        required: [true, 'Latitude is required'],
+        min: -90,
+        max: 90
+      },
+      longitude: {
+        type: Number,
+        required: [true, 'Longitude is required'],
+        min: -180,
+        max: 180
+      }
+    }
   },
 
   profilePicture: {
@@ -49,22 +84,41 @@ const userSchema = new mongoose.Schema({
     default: 'default-avatar.png'
   },
 
+  hasCompletedProfile: {
+    type: Boolean,
+    default: false
+  },
+
   isActive: {
     type: Boolean,
     default: true
   },
 
-  createdAt: {
-    type: Date,
-    default: Date.now
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+
+  lastLogin: {
+    type: Date
   }
+
+}, {
+  timestamps: true  // Auto-creates createdAt and updatedAt
 });
+
+
+// INDEXES
+
+//userSchema.index({ email: 1 });
+userSchema.index({ role: 1 });
+userSchema.index({ 'location.city': 1 });
+userSchema.index({ 'location.coordinates.latitude': 1, 'location.coordinates.longitude': 1 });
 
 
 // Hash password before saving
 
 userSchema.pre('save', async function(next) {
-  // Only hash if password is modified
   if (!this.isModified('password')) {
     return next();
   }

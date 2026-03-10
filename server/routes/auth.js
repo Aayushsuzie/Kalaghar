@@ -12,10 +12,10 @@ const User = require('../models/User');
 // ========================================
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role, location } = req.body;
+    const { name, email, password,phone, role, location } = req.body;
 
     // Validate required fields
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !password || !role || !phone) {
       return res.status(400).json({
         success: false,
         message: 'Please provide name, email, password, and role'
@@ -36,6 +36,7 @@ router.post('/register', async (req, res) => {
       name,
       email,
       password,
+      phone,
       role,
       location
     });
@@ -56,7 +57,8 @@ router.post('/register', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        phone: user.phone
       }
     });
 
