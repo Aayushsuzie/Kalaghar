@@ -42,6 +42,7 @@ const authRoutes = require('./routes/auth');
 const classRoutes = require('./routes/classes');
 
 
+
 // STEP 6: Basic Routes
 
 app.get('/', (req, res) => {
