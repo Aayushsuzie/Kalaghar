@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KalaGhar - Registration with Live Location</title>
+    <title>Kala-Ghar - Registration with Live Location</title>
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -16,24 +16,26 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #A15D66;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F8F5EF;
             min-height: 100vh;
             padding: 20px;
+            color: #333333;
         }
 
         .container {
             max-width: 500px;
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
+            background: #ffffff;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(109, 76, 58, 0.12);
+            border: 1px solid #e8dfd4;
         }
 
         .header {
-            background: #F3EED7;
-            color: black;
+            background: #6D4C3A;
+            color: #ffffff;
             padding: 30px;
             text-align: center;
         }
@@ -41,10 +43,12 @@
         .header h1 {
             font-size: 28px;
             margin-bottom: 5px;
+            font-family: Georgia, 'Times New Roman', serif;
+            letter-spacing: 0.04em;
         }
 
         .header p {
-            opacity: 0.9;
+            opacity: 0.95;
             font-size: 14px;
         }
 
@@ -66,7 +70,7 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: #e0e0e0;
+            background: #d4c4b0;
             z-index: 1;
         }
 
@@ -81,8 +85,8 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #e0e0e0;
-            color: #999;
+            background: #e8dfd4;
+            color: #6b5b52;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -92,23 +96,23 @@
         }
 
         .step.active .step-circle {
-            background: #667eea;
+            background: #D97D40;
             color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(217, 125, 64, 0.4);
         }
 
         .step.completed .step-circle {
-            background: #28a745;
+            background: #6b8e5a;
             color: white;
         }
 
         .step-label {
             font-size: 12px;
-            color: #999;
+            color: #6b5b52;
         }
 
         .step.active .step-label {
-            color: #667eea;
+            color: #6D4C3A;
             font-weight: 600;
         }
 
@@ -133,7 +137,7 @@
         label {
             display: block;
             font-weight: 600;
-            color: #333;
+            color: #333333;
             margin-bottom: 8px;
             font-size: 14px;
         }
@@ -141,17 +145,18 @@
         input, select {
             width: 100%;
             padding: 14px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
+            border: 1px solid #d4c4b0;
+            border-radius: 8px;
             font-size: 15px;
-            transition: all 0.3s;
+            transition: all 0.2s;
             font-family: inherit;
+            background: #faf8f5;
         }
 
         input:focus, select:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #D97D40;
+            box-shadow: 0 0 0 2px rgba(217, 125, 64, 0.15);
         }
 
         .role-selector {
@@ -162,19 +167,19 @@
         }
 
         .role-card {
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
+            border: 2px solid #d4c4b0;
+            border-radius: 12px;
             padding: 20px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             position: relative;
         }
 
         .role-card:hover {
-            border-color: #667eea;
+            border-color: #D97D40;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 4px 16px rgba(109, 76, 58, 0.12);
         }
 
         .role-card input[type="radio"] {
@@ -183,8 +188,9 @@
         }
 
         .role-card.selected {
-            border-color: #667eea;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-color: #D97D40;
+            background: rgba(217, 125, 64, 0.1);
+            box-shadow: 0 0 0 1px rgba(217, 125, 64, 0.2);
         }
 
         .role-icon {
@@ -194,15 +200,16 @@
 
         .role-label {
             font-weight: 600;
-            color: #333;
+            color: #333333;
         }
 
         /* Location Section */
         .location-section {
-            background: #f8f9fa;
-            border-radius: 15px;
+            background: #faf8f5;
+            border-radius: 12px;
             padding: 20px;
             margin: 20px 0;
+            border: 1px solid #e8dfd4;
         }
 
         .location-header {
@@ -214,7 +221,7 @@
 
         .location-header h3 {
             flex: 1;
-            color: #333;
+            color: #333333;
             font-size: 16px;
         }
 
@@ -250,16 +257,17 @@
 
         #map {
             height: 300px;
-            border-radius: 10px;
+            border-radius: 8px;
             margin: 15px 0;
-            border: 2px solid #e0e0e0;
+            border: 1px solid #d4c4b0;
         }
 
         .location-details {
-            background: white;
+            background: #ffffff;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 8px;
             margin-top: 15px;
+            border: 1px solid #e8dfd4;
         }
 
         .location-item {
@@ -295,36 +303,38 @@
         }
 
         .btn-primary {
-            background: #F3EED7;
+            background: #D97D40;
             color: white;
+            border: 1px solid #b85f2a;
         }
 
         .btn-primary:hover:not(:disabled) {
+            background: #c96d32;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 14px rgba(217, 125, 64, 0.4);
         }
 
         .btn-secondary {
             background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+            color: #6D4C3A;
+            border: 2px solid #6D4C3A;
         }
 
         .btn-secondary:hover:not(:disabled) {
-            background: #667eea;
+            background: #6D4C3A;
             color: white;
         }
 
         .btn-location {
-            background: #28a745;
+            background: #6b8e5a;
             color: white;
             margin-bottom: 15px;
         }
 
         .btn-location:hover:not(:disabled) {
-            background: #218838;
+            background: #5c7d4e;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+            box-shadow: 0 4px 14px rgba(107, 142, 90, 0.4);
         }
 
         .btn:disabled {
@@ -362,11 +372,11 @@
         }
 
         .success-message {
-            background: #d4edda;
-            border: 2px solid #c3e6cb;
-            color: #155724;
+            background: rgba(107, 142, 90, 0.15);
+            border: 1px solid #6b8e5a;
+            color: #2d4a1f;
             padding: 20px;
-            border-radius: 15px;
+            border-radius: 12px;
             text-align: center;
             margin: 20px 0;
         }
@@ -376,11 +386,11 @@
         }
 
         .error-message {
-            background: #f8d7da;
-            border: 2px solid #f5c6cb;
+            background: rgba(196, 92, 74, 0.12);
+            border: 1px solid #c45c4a;
             color: #721c24;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 8px;
             margin: 15px 0;
             font-size: 14px;
         }
@@ -408,14 +418,14 @@
         .accuracy-bar {
             flex: 1;
             height: 6px;
-            background: #e0e0e0;
+            background: #e8dfd4;
             border-radius: 3px;
             overflow: hidden;
         }
 
         .accuracy-fill {
             height: 100%;
-            background: linear-gradient(90deg, #28a745, #20c997);
+            background: linear-gradient(90deg, #6b8e5a, #8fa87a);
             transition: width 0.3s;
         }
 
@@ -434,7 +444,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏠 KalaGhar</h1>
+            <h1>Kala-Ghar</h1>
             <p>Join as a Student or Teacher</p>
         </div>
 
@@ -630,7 +640,7 @@ phoneInput.addEventListener("input", function () {
         phoneInput.style.borderColor = "#d93025";
     } else {
         phoneError.style.display = "none";
-        phoneInput.style.borderColor = "#28a745";
+        phoneInput.style.borderColor = "#6b8e5a";
     }
 });
         
@@ -775,7 +785,7 @@ phoneInput.addEventListener("input", function () {
                     document.getElementById('confirmLocationBtn').disabled = false;
 
                     btnText.textContent = '✓ Location Active';
-                    btn.style.background = '#28a745';
+                    btn.style.background = '#6b8e5a';
 
                     // Stop watching after first accurate reading
                     if (accuracy < 50) {
@@ -850,8 +860,8 @@ phoneInput.addEventListener("input", function () {
             if (userData.location.accuracy) {
                 L.circle([lat, lng], {
                     radius: userData.location.accuracy,
-                    color: '#667eea',
-                    fillColor: '#667eea',
+                    color: '#6b8e5a',
+                    fillColor: '#6b8e5a',
                     fillOpacity: 0.1,
                     weight: 1
                 }).addTo(map);
