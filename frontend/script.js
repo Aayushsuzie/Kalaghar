@@ -31,17 +31,32 @@ if (form) {
 
       const data = await res.json();
       
-      // Store token and role in localStorage
+      // ========================================
+      // UPDATED: Store ALL user data in localStorage
+      // ========================================
       if (data.token) {
         localStorage.setItem("authToken", data.token);
       }
       if (data.user && data.user.role) {
         localStorage.setItem("userRole", data.user.role);
       }
+      if (data.user && data.user.id) {
+        localStorage.setItem("userId", data.user.id);        // ← NEW!
+      }
+      if (data.user && data.user.name) {
+        localStorage.setItem("userName", data.user.name);    // ← NEW!
+      }
       
       message.textContent = "Login successful!";
       message.className = "form-message success";
+      
+      // Debug logging
       console.log("Login response:", data);
+      console.log("Saved to localStorage:");
+      console.log("- Token:", data.token ? "✓" : "✗");
+      console.log("- Role:", data.user?.role);
+      console.log("- User ID:", data.user?.id);
+      console.log("- User Name:", data.user?.name);
       
       // Redirect based on role after a short delay
       setTimeout(() => {
@@ -51,7 +66,6 @@ if (form) {
         } else if (role === "teacher") {
           window.location.href = "teacher-dashboard.html";
         } else {
-          // Fallback: redirect to home if role is missing/unknown
           window.location.href = "index.html";
         }
       }, 1000);
