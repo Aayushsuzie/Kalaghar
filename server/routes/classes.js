@@ -6,7 +6,6 @@ const router = express.Router();
 const Class = require('../models/Class');
 const User = require('../models/User');
 
-
 // POST /api/classes - Create new class
 
 router.post('/', async (req, res) => {

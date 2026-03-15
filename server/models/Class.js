@@ -37,11 +37,20 @@ const classSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Skill/Subject is required'],
     enum: [
+      // Music
       'Guitar', 'Piano', 'Violin', 'Drums', 'Vocal',
       
+      // Academics
+      'Math', 'Physics', 'Chemistry', 'Biology',
       
+      // Languages
+      'English', 'Spanish', 'French', 'Hindi', 'Nepali',
+      
+      // Arts & Fitness
       'Painting', 'Drawing', 'Dance', 'Yoga',
-      'Cooking', 'Photography', 
+      
+      // Other
+      'Cooking', 'Photography', 'Programming'
     ]
   },
 

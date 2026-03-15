@@ -84,6 +84,47 @@ const userSchema = new mongoose.Schema({
     default: 'default-avatar.png'
   },
 
+  // TEACHER PROFILE FIELDS
+  bio: {
+    type: String,
+    trim: true,
+    maxlength: [1000, 'Bio cannot exceed 1000 characters'],
+    default: ''
+  },
+
+  experience: {
+    type: String,
+    trim: true,
+    maxlength: [120, 'Experience cannot exceed 120 characters'],
+    default: ''
+  },
+
+  skills: [{
+    type: String,
+    trim: true
+  }],
+
+  availability: [{
+    day: {
+      type: String,
+      enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    },
+    startTime: {
+      type: String,
+      match: [/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Please provide valid time format (HH:MM)']
+    },
+    endTime: {
+      type: String,
+      match: [/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Please provide valid time format (HH:MM)']
+    }
+  }],
+
+  sessionRate: {
+    type: Number,
+    min: [0, 'Session rate must be positive'],
+    default: 0
+  },
+
   hasCompletedProfile: {
     type: Boolean,
     default: false

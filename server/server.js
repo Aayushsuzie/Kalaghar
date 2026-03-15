@@ -40,6 +40,7 @@ mongoose.connect(MONGODB_URI)
 
 const authRoutes = require('./routes/auth');
 const classRoutes = require('./routes/classes');
+const userRoutes = require('./routes/users');
 
 
 
@@ -64,6 +65,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/classes', classRoutes);
+app.use('/api/users', userRoutes);
 
 
 // STEP 8: Start Server
