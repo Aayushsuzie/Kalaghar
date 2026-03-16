@@ -1,163 +1,274 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>KalaGhar – Student Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Classes - Kala-Ghar</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-browse-classes">
     <script>
-      // Check if user is logged in
-      const token = localStorage.getItem("authToken");
-      const userRole = localStorage.getItem("userRole");
-      
-      if (!token) {
-        window.location.href = "login.html";
-      }
-      
-      // Verify role matches
-      if (userRole !== "student") {
-        // If not a student, redirect to appropriate dashboard or login
-        if (userRole === "teacher") {
-          window.location.href = "teacher-dashboard.html";
-        } else {
-          window.location.href = "login.html";
+        // Check authentication
+        const token = localStorage.getItem('authToken');
+        const userRole = localStorage.getItem('userRole');
+        
+        if (!token || userRole !== 'student') {
+            window.location.href = 'login.html';
         }
-      }
     </script>
 
     <header class="navbar">
-      <div class="logo">Kala-Ghar</div>
-      <div class="nav-actions">
-        <a href="index.html" class="btn-link">Home</a>
-        <span class="nav-divider" aria-hidden="true"></span>
-        <button id="logout-btn" class="btn-logout">Log Out</button>
-      </div>
+        <div class="logo">Kala-Ghar</div>
+        <div class="nav-actions">
+            <a href="student-dashboard.html" class="btn-link">Back to Dashboard</a>
+            <button id="logout-btn" class="btn-logout">Log Out</button>
+        </div>
     </header>
 
-    <main class="section">
-      <div class="dashboard-header">
-        <h1 class="dashboard-title">Explore skills</h1>
-        <p class="dashboard-subtitle">
-          Choose a category to see the skills inside it.
-        </p>
-      </div>
-
-      <section class="skill-browser" aria-label="Skills categories">
-        <div class="skill-browser__col">
-          <h2 class="skill-browser__title">Categories</h2>
-          <div id="category-list" class="category-list" role="list"></div>
+    <main class="browse-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="breadcrumb">
+                <a href="student-dashboard.html">Dashboard</a> / 
+                <span id="skill-breadcrumb">Classes</span>
+            </div>
+            <h1 class="page-title" id="page-title">Browse Classes</h1>
+            <p class="results-count" id="results-count">Loading...</p>
         </div>
 
-        <div class="skill-browser__col">
-          <h2 class="skill-browser__title">
-            <span id="subcategory-title">Sub-categories</span>
-          </h2>
-          <div id="subcategory-list" class="subcategory-grid" role="list"></div>
-          <p id="subcategory-hint" class="dashboard-hint">
-            Select a category to view sub-categories.
-          </p>
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label>Student Level</label>
+                    <select id="levelFilter">
+                        <option value="">All Levels</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                        <option value="all-levels">All Levels</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Price (Rs)</label>
+                    <input type="number" id="priceFilter" placeholder="e.g., 2000">
+                </div>
+
+                <div class="filter-group">
+                    <label>Sort By</label>
+                    <select id="sortFilter">
+                        <option value="newest">Newest First</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="rating">Highest Rated</option>
+                    </select>
+                </div>
+            </div>
         </div>
-      </section>
+
+        <!-- Classes Grid -->
+        <div id="classes-container">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading classes...</p>
+            </div>
+        </div>
     </main>
 
     <footer class="footer">
-      <p>&copy; <span id="year"></span> Kalaghar. All rights reserved.</p>
+        <p>&copy; <span id="year"></span> Kala-Ghar. All rights reserved.</p>
     </footer>
 
-    <script src="script.js"></script>
     <script>
-      const categoryListEl = document.getElementById("category-list");
-      const subcategoryListEl = document.getElementById("subcategory-list");
-      const subcategoryTitleEl = document.getElementById("subcategory-title");
-      const subcategoryHintEl = document.getElementById("subcategory-hint");
+        const API_URL = 'http://localhost:5000';
+        let allClasses = [];
 
-      let SKILL_CATEGORIES = [];
+        // Get skill from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedSkill = urlParams.get('skill') || sessionStorage.getItem('selectedSkill');
 
-      function setActiveCategory(categoryId) {
-        const category = SKILL_CATEGORIES.find((c) => c.categoryId === categoryId);
-        if (!category) return;
-
-        // Update active styles
-        document.querySelectorAll("[data-category-id]").forEach((btn) => {
-          const isActive = btn.getAttribute("data-category-id") === categoryId;
-          btn.classList.toggle("category-btn--active", isActive);
-          btn.setAttribute("aria-pressed", String(isActive));
-        });
-
-        // Render subcategories
-        subcategoryTitleEl.textContent = `Sub-categories • ${category.categoryName}`;
-        subcategoryHintEl.style.display = "none";
-
-        subcategoryListEl.innerHTML = "";
-        category.skills.forEach((skill) => {
-          const item = document.createElement("button");
-          item.type = "button";
-          item.className = "subcategory-card";
-          item.setAttribute("role", "listitem");
-          item.textContent = `${skill.skillName} (${skill.count})`;
-          item.addEventListener("click", () => {
-            // For now just confirm selection; later we can navigate to a skill list page.
-            alert(`Selected: ${category.categoryName} → ${skill.skillName}`);
-          });
-          subcategoryListEl.appendChild(item);
-        });
-      }
-
-      async function loadSkillCategories() {
-        categoryListEl.innerHTML = "";
-        subcategoryListEl.innerHTML = "";
-        subcategoryTitleEl.textContent = "Sub-categories";
-        subcategoryHintEl.textContent = "Loading categories...";
-        subcategoryHintEl.style.display = "block";
-
-        try {
-          const res = await fetch("http://localhost:5000/api/classes/skills-summary");
-          const json = await res.json();
-
-          if (!res.ok || json.success === false) {
-            throw new Error(json.message || "Could not load skills");
-          }
-
-          SKILL_CATEGORIES = json.data || [];
-
-          if (!SKILL_CATEGORIES.length) {
-            subcategoryHintEl.textContent =
-              "No classes have been posted yet. Check back soon!";
-            return;
-          }
-
-          SKILL_CATEGORIES.forEach((cat) => {
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "category-btn";
-            btn.textContent = cat.categoryName;
-            btn.setAttribute("role", "listitem");
-            btn.setAttribute("data-category-id", cat.categoryId);
-            btn.setAttribute("aria-pressed", "false");
-            btn.addEventListener("click", () => setActiveCategory(cat.categoryId));
-            categoryListEl.appendChild(btn);
-          });
-
-          // Optionally select the first category by default
-          setActiveCategory(SKILL_CATEGORIES[0].categoryId);
-        } catch (error) {
-          console.error("Error loading skills summary:", error);
-          subcategoryHintEl.textContent =
-            "There was a problem loading available skills. Please try again later.";
+        // Update page title
+        if (selectedSkill) {
+            document.getElementById('page-title').textContent = `${selectedSkill} Classes`;
+            document.getElementById('skill-breadcrumb').textContent = selectedSkill;
         }
-      }
 
-      // Logout functionality
-      document.getElementById("logout-btn")?.addEventListener("click", () => {
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("userRole");
-        window.location.href = "login.html";
-      });
+        // Load classes
+        async function loadClasses() {
+            try {
+                const url = selectedSkill 
+                    ? `${API_URL}/api/classes?skill=${encodeURIComponent(selectedSkill)}&status=published`
+                    : `${API_URL}/api/classes?status=published`;
 
-      // Load categories when the page is ready
-      loadSkillCategories();
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    allClasses = data.classes;
+                    updateResultsCount(data.classes.length);
+                    displayClasses(data.classes);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('classes-container').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">❌</div>
+                        <h3 class="empty-state-title">Error Loading Classes</h3>
+                        <p class="empty-state-text">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Update results count
+        function updateResultsCount(count) {
+            const text = count === 1 ? '1 class available' : `${count} classes available`;
+            document.getElementById('results-count').textContent = text;
+        }
+
+        // Display classes
+        function displayClasses(classes) {
+            const container = document.getElementById('classes-container');
+
+            if (classes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📚</div>
+                        <h3 class="empty-state-title">No Classes Found</h3>
+                        <p class="empty-state-text">Try adjusting your filters or check back later.</p>
+                        <button class="btn btn-primary empty-state-btn" onclick="window.location.href='student-dashboard.html'">
+                            Back to Dashboard
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `<div class="classes-grid"></div>`;
+            const grid = container.querySelector('.classes-grid');
+
+            classes.forEach(cls => {
+                const card = document.createElement('div');
+                card.className = 'class-card';
+                
+                const teacherInitial = cls.teacher?.name?.charAt(0).toUpperCase() || 'T';
+                const spotsLeft = cls.maxStudents - (cls.currentEnrollment || 0);
+
+                card.innerHTML = `
+                    <div class="class-header">
+                        <div>
+                            <h3 class="class-title">${cls.className}</h3>
+                            <span class="class-skill">${cls.skill}</span>
+                        </div>
+                        <div class="class-price">Rs ${cls.pricing.amount}</div>
+                    </div>
+
+                    <div class="class-teacher">
+                        <div class="teacher-avatar">${teacherInitial}</div>
+                        <div class="teacher-info">
+                            <div class="name">${cls.teacher?.name || 'Teacher'}</div>
+                            <div class="rating">⭐ ${cls.stats?.averageRating || 0} (${cls.stats?.totalReviews || 0} reviews)</div>
+                        </div>
+                    </div>
+
+                    <p class="class-description">
+                        ${cls.description.substring(0, 120)}${cls.description.length > 120 ? '...' : ''}
+                    </p>
+
+                    <div class="class-meta">
+                        <div class="meta-item">
+                            <span>📅</span>
+                            <span>${new Date(cls.schedule.date).toLocaleDateString()}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>⏰</span>
+                            <span>${cls.schedule.startTime} - ${cls.schedule.endTime}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>📊</span>
+                            <span>${cls.studentLevel}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>👥</span>
+                            <span>${spotsLeft} spots left</span>
+                        </div>
+                    </div>
+
+                    <div class="class-actions">
+                        <button class="btn btn-secondary" onclick="viewDetails('${cls._id}')">
+                            View Details
+                        </button>
+                        <button class="btn btn-primary" onclick="enrollNow('${cls._id}')">
+                            Enroll Now
+                        </button>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const level = document.getElementById('levelFilter').value;
+            const maxPrice = document.getElementById('priceFilter').value;
+            const sort = document.getElementById('sortFilter').value;
+
+            let filtered = [...allClasses];
+
+            if (level) {
+                filtered = filtered.filter(c => 
+                    c.studentLevel === level || c.studentLevel === 'all-levels'
+                );
+            }
+
+            if (maxPrice) {
+                filtered = filtered.filter(c => c.pricing.amount <= parseFloat(maxPrice));
+            }
+
+            // Sort
+            if (sort === 'price-low') {
+                filtered.sort((a, b) => a.pricing.amount - b.pricing.amount);
+            } else if (sort === 'price-high') {
+                filtered.sort((a, b) => b.pricing.amount - a.pricing.amount);
+            } else if (sort === 'rating') {
+                filtered.sort((a, b) => (b.stats?.averageRating || 0) - (a.stats?.averageRating || 0));
+            } else {
+                filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            }
+
+            updateResultsCount(filtered.length);
+            displayClasses(filtered);
+        }
+
+        // Event listeners
+        document.getElementById('levelFilter').addEventListener('change', applyFilters);
+        document.getElementById('priceFilter').addEventListener('input', applyFilters);
+        document.getElementById('sortFilter').addEventListener('change', applyFilters);
+
+        // Actions
+        function viewDetails(classId) {
+            window.location.href = `class-details.html?id=${classId}`;
+        }
+
+        function enrollNow(classId) {
+            alert('Enrollment system coming soon!');
+            viewDetails(classId);
+        }
+
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        });
+
+        // Load data
+        document.getElementById('year').textContent = new Date().getFullYear();
+        loadClasses();
     </script>
-  </body>
+</body>
 </html>
+
+

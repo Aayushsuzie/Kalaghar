@@ -1,62 +1,944 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>KalaGhar – Teacher Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Kala-Ghar</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-teacher-dashboard">
     <script>
-      // Check if user is logged in
-      const token = localStorage.getItem("authToken");
-      const userRole = localStorage.getItem("userRole");
-      
-      if (!token) {
-        window.location.href = "login.html";
-      }
-      
-      // Verify role matches
-      if (userRole !== "teacher") {
-        // If not a teacher, redirect to appropriate dashboard or login
-        if (userRole === "student") {
-          window.location.href = "student-dashboard.html";
-        } else {
-          window.location.href = "login.html";
+        // Auth check
+        const token = localStorage.getItem('authToken');
+        const userRole = localStorage.getItem('userRole');
+        const userId = localStorage.getItem('userId');
+        const userName = localStorage.getItem('userName');
+        
+        if (!token || userRole !== 'teacher' || !userId) {
+            window.location.href = 'login.html';
         }
-      }
     </script>
 
-    <header class="navbar">
-      <div class="logo">Kala-Ghar</div>
-      <div class="nav-actions">
-        <a href="index.html" class="btn-link">Home</a>
-        <span class="nav-divider" aria-hidden="true"></span>
-        <button id="logout-btn" class="btn-logout">Log Out</button>
-      </div>
-    </header>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">Kala-Ghar</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="#my-bookings">My Bookings</a>
+            <a href="#" onclick="openPostClass(); return false;">Post a Class</a>
+            
+            <button class="btn-logout" id="logout-btn">Log Out</button>
+        </div>
+    </nav>
 
-    <main class="section">
-      <h1>Welcome to Your Teacher Dashboard</h1>
-      <p>You are logged in as a teacher.</p>
-      <div id="user-info" style="margin-top: 20px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
-        <p><strong>Role:</strong> <span id="display-role">Teacher</span></p>
-        <p><strong>Status:</strong> Logged in</p>
-      </div>
-    </main>
+    <!-- Main Container -->
+    <div class="dashboard-container">
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <!-- Profile Card -->
+            <div class="profile-card">
+                <div class="profile-image-container">
+                    <div class="profile-image-placeholder" id="profile-image">👨‍🏫</div>
+                    <button class="edit-profile-btn" onclick="editProfile()">Edit Profile</button>
+                </div>
+                <div class="profile-info">
+                    <h1 class="profile-name" id="teacher-name">Loading...</h1>
+                    <p class="profile-title" id="teacher-title">Teacher</p>
+                    
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <span class="detail-icon">📍</span>
+                            <span id="teacher-location">Location</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-icon">🎓</span>
+                            <span id="teacher-experience">Experience</span>
+                        </div>
+                    </div>
 
+                    <div class="profile-rating">
+                        <span class="rating-stars">⭐⭐⭐⭐⭐</span>
+                        <span class="rating-text" id="teacher-rating">0.0 (0 Reviews)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Me Section -->
+            <div class="about-section">
+                <h2 class="section-title">About Me</h2>
+                <p class="about-text" id="teacher-bio">
+                    Welcome to my teaching profile! Share your expertise and passion with students.
+                </p>
+
+                <h3 class="subsection-title">Skills</h3>
+                <ul class="skills-list" id="teacher-skills">
+                    <li>Add your skills in profile</li>
+                </ul>
+
+                <h3 class="subsection-title">Availability</h3>
+                <div class="availability-grid" id="teacher-availability">
+                    <div class="availability-item">
+                        <span class="day">Set your availability in profile</span>
+                    </div>
+                </div>
+
+                <div class="session-rate">
+                    <div class="rate-title">Session Rate</div>
+                    <div class="rate-amount">Rs <span id="teacher-rate">700</span> per session</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <h2 class="section-title section-title--light">Dashboard Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-value" id="total-classes">0</div>
+                    <div class="stat-label">Total Classes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value" id="total-students">0</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value" id="active-classes">0</div>
+                    <div class="stat-label">Active Classes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-value" id="avg-rating">0.0</div>
+                    <div class="stat-label">Average Rating</div>
+                </div>
+            </div>
+        </div>
+
+        
+        <!-- Student Reviews -->
+        <div class="reviews-section" id="reviews-section">
+            <h2 class="section-title">Student Reviews</h2>
+            <div id="reviews-list">
+                <div class="empty-state">
+                    <div class="empty-state-icon">⭐</div>
+                    <p>No reviews yet. Start teaching to receive feedback!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Classes -->
+        <div class="classes-section">
+            <h2 class="section-title">My Classes</h2>
+            
+            <div class="class-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="published">Published</button>
+                <button class="filter-btn" data-filter="draft">Draft</button>
+            </div>
+
+            <div class="classes-grid" id="classes-list">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📚</div>
+                    <p>Loading your classes...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
     <footer class="footer">
-      <p>&copy; <span id="year"></span> Kalaghar. All rights reserved.</p>
+        <p>&copy; <span id="year"></span> Kala-Ghar. Preserving tradition, empowering learning.</p>
     </footer>
 
-    <script src="script.js"></script>
+    <!-- Post a Class Modal -->
+    <div class="modal-overlay" id="post-class-modal" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="post-class-title">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="post-class-title">Post a class</div>
+                    <div style="color:#8B4513; font-weight:700; font-size: 13px;">
+                        Fill the details below. This matches the `Class.js` model fields.
+                    </div>
+                </div>
+                <button class="modal-close" type="button" id="close-post-class" aria-label="Close">
+                    ✕
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="post-class-form">
+                    <div class="section-divider">Class details</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="className">Class name</label>
+                            <input id="className" name="className" type="text" minlength="5" maxlength="100" required />
+                        </div>
+                        <div class="field">
+                            <label for="skill">Skill / subject</label>
+                            <select id="skill" name="skill" required>
+                                <option value="" selected disabled>Select skill</option>
+                                <option>Guitar</option>
+                                <option>Piano</option>
+                                <option>Violin</option>
+                                <option>Drums</option>
+                                <option>Vocal</option>
+                                <option>Painting</option>
+                                <option>Drawing</option>
+                                <option>Dance</option>
+                                <option>Yoga</option>
+                                <option>Cooking</option>
+                                <option>Photography</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field" style="margin-top: 14px;">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" minlength="20" maxlength="1000" required></textarea>
+                    </div>
+
+                    <div class="section-divider">Schedule</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="date">Date</label>
+                            <input id="date" name="date" type="date" required />
+                        </div>
+                        <div class="field">
+                            <label for="isRecurring">Recurring?</label>
+                            <select id="isRecurring" name="isRecurring">
+                                <option value="false" selected>No</option>
+                                <option value="true">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="recurring-wrap" style="display:none; margin-top: 12px;">
+                        <div class="field">
+                            <label>Recurring days</label>
+                            <div class="checklist" id="recurring-days">
+                                <label class="check"><input type="checkbox" name="recurringDays" value="monday" /> Monday</label>
+                                <label class="check"><input type="checkbox" name="recurringDays" value="tuesday" /> Tuesday</label>
+                                <label class="check"><input type="checkbox" name="recurringDays" value="wednesday" /> Wednesday</label>
+                                <label class="check"><input type="checkbox" name="recurringDays" value="thursday" /> Thursday</label>
+                                <label class="check"><input type="checkbox" name="recurringDays" value="friday" /> Friday</label>
+                                <label class="check"><input type="checkbox" name="recurringDays" value="saturday" /> Saturday</label>
+                                <label class="check"><input type="checkbox" name="recurringDays" value="sunday" /> Sunday</label>
+                            </div>
+                        </div>
+                        <div class="field" style="margin-top: 12px;">
+                            <label for="endDate">End date (recurring)</label>
+                            <input id="endDate" name="endDate" type="date" />
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="margin-top: 14px;">
+                        <div class="field">
+                            <label for="startTime">Start time</label>
+                            <input id="startTime" name="startTime" type="time" required />
+                        </div>
+                        <div class="field">
+                            <label for="endTime">End time</label>
+                            <input id="endTime" name="endTime" type="time" required />
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Students</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="studentLevel">Student level</label>
+                            <select id="studentLevel" name="studentLevel" required>
+                                <option value="" selected disabled>Select level</option>
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                                <option value="all-levels">All levels</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="maxStudents">Max students</label>
+                            <input id="maxStudents" name="maxStudents" type="number" min="1" max="50" required />
+                        </div>
+                    </div>
+                    <div class="form-grid" style="margin-top: 14px;">
+                        <div class="field">
+                            <label for="minStudents">Min students</label>
+                            <input id="minStudents" name="minStudents" type="number" min="1" value="1" />
+                        </div>
+                        <div class="field">
+                            <label>Age group (optional)</label>
+                            <div class="checklist">
+                                <label class="check"><input type="checkbox" name="ageGroup" value="child" /> Child</label>
+                                <label class="check"><input type="checkbox" name="ageGroup" value="teen" /> Teen</label>
+                                <label class="check"><input type="checkbox" name="ageGroup" value="young-adult" /> Young adult</label>
+                                <label class="check"><input type="checkbox" name="ageGroup" value="adult" /> Adult</label>
+                                <label class="check"><input type="checkbox" name="ageGroup" value="senior" /> Senior</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Pricing</div>
+                    <div class="form-grid-3">
+                        <div class="field">
+                            <label for="amount">Amount</label>
+                            <input id="amount" name="amount" type="number" min="0" step="0.01" required />
+                        </div>
+                        <div class="field">
+                            <label for="currency">Currency</label>
+                            <input id="currency" name="currency" type="text" value="NPR" />
+                        </div>
+                        <div class="field">
+                            <label for="priceType">Price type</label>
+                            <select id="priceType" name="priceType">
+                                <option value="per-class" selected>Per class</option>
+                                <option value="per-hour">Per hour</option>
+                                <option value="per-student">Per student</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Location</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="locationType">Location type</label>
+                            <select id="locationType" name="locationType" required>
+                                <option value="" selected disabled>Select location</option>
+                                <option value="teacher-location">Teacher location</option>
+                                <option value="student-location">Student location</option>
+                                <option value="online">Online</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="field" id="address-wrap" style="display:none;">
+                            <label for="address">Address (custom)</label>
+                            <input id="address" name="address" type="text" maxlength="200" placeholder="Street, city, landmark..." />
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Additional info</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="requirements">Requirements (optional)</label>
+                            <textarea id="requirements" name="requirements" maxlength="500" placeholder="e.g. bring your own instrument"></textarea>
+                        </div>
+                        <div class="field">
+                            <label for="materials">Materials (optional, comma separated)</label>
+                            <textarea id="materials" name="materials" placeholder="e.g. notebook, pencil, guitar pick"></textarea>
+                        </div>
+                    </div>
+                    <div class="field" style="margin-top: 14px;">
+                        <label for="tags">Tags (optional, comma separated)</label>
+                        <input id="tags" name="tags" type="text" placeholder="e.g. beginner-friendly, weekend" />
+                    </div>
+
+                    <div class="check" style="margin-top: 14px;">
+                        <input type="checkbox" id="publishNow" name="publishNow" value="true" />
+                        <label for="publishNow" style="cursor:pointer;">Publish immediately (otherwise saved as draft)</label>
+                    </div>
+
+                    <div class="form-message" id="post-class-message" role="status" aria-live="polite"></div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancel-post-class">Cancel</button>
+                        <button type="submit" class="btn-primary-solid">Save class</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal-overlay" id="edit-profile-modal" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-profile-title">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="edit-profile-title">Edit profile</div>
+                    <div style="color:#8B4513; font-weight:700; font-size: 13px;">
+                        Update your bio, picture, and details.
+                    </div>
+                </div>
+                <button class="modal-close" type="button" id="close-edit-profile" aria-label="Close">
+                    ✕
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-profile-form">
+                    <div class="section-divider">Basic info</div>
+                    <div class="profile-form-grid">
+                        <div class="field">
+                            <label for="profileName">Name</label>
+                            <input id="profileName" name="name" type="text" minlength="2" maxlength="50" required />
+                        </div>
+                        <div class="field">
+                            <label for="profilePhone">Phone</label>
+                            <input id="profilePhone" name="phone" type="tel" placeholder="9841234567" />
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Bio</div>
+                    <div class="field">
+                        <label for="profileBio">Bio</label>
+                        <textarea id="profileBio" name="bio" maxlength="1000" placeholder="Tell students about you..."></textarea>
+                    </div>
+
+                    <div class="section-divider">Teaching</div>
+                    <div class="profile-form-grid">
+                        <div class="field">
+                            <label for="profileExperience">Experience (e.g. 5+ years)</label>
+                            <input id="profileExperience" name="experience" type="text" maxlength="120" />
+                        </div>
+                        <div class="field">
+                            <label for="profileRate">Session rate (Rs)</label>
+                            <input id="profileRate" name="sessionRate" type="number" min="0" step="1" />
+                        </div>
+                    </div>
+
+                    <div class="field" style="margin-top: 14px;">
+                        <label for="profileSkills">Skills (comma separated)</label>
+                        <input id="profileSkills" name="skills" type="text" placeholder="e.g. Guitar, Piano, Yoga" />
+                    </div>
+
+                    <div class="section-divider">Location</div>
+                    <div class="profile-form-grid">
+                        <div class="field">
+                            <label for="profileCity">City</label>
+                            <input id="profileCity" name="city" type="text" />
+                        </div>
+                        <div class="field">
+                            <label for="profileAddress">Address</label>
+                            <input id="profileAddress" name="address" type="text" />
+                        </div>
+                    </div>
+                    
+                    <div class="section-divider">Profile picture</div>
+                    <div class="field">
+                        <label for="profilePic">Upload new picture</label>
+                        <input id="profilePic" name="profilePic" type="file" accept="image/*" />
+                        <div style="color:#8B4513; font-weight:700; font-size: 12px; margin-top: 6px;">
+                            Note: This stores the image in the database as a base64 string.
+                        </div>
+                    </div>
+
+                    <div class="form-message" id="edit-profile-message" role="status" aria-live="polite"></div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancel-edit-profile">Cancel</button>
+                        <button type="submit" class="btn-primary-solid">Save profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
-      // Logout functionality
-      document.getElementById("logout-btn")?.addEventListener("click", () => {
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("userRole");
-        window.location.href = "login.html";
-      });
+        const API_URL = 'http://localhost:5000';
+        let allClasses = [];
+        let currentFilter = 'all';
+
+        // Load teacher data
+        async function loadTeacherData() {
+            try {
+                const userId = localStorage.getItem('userId');
+                const userName = localStorage.getItem('userName');
+
+                // Set basic info
+                document.getElementById('teacher-name').textContent = userName || 'Teacher';
+
+                // Load classes
+                const response = await fetch(`${API_URL}/api/classes?teacherId=${userId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    allClasses = data.classes;
+                    updateStats(data.classes);
+                    displayClasses(data.classes);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Update stats
+        function updateStats(classes) {
+            const total = classes.length;
+            const active = classes.filter(c => c.status === 'published').length;
+            const students = classes.reduce((sum, c) => sum + (c.currentEnrollment || 0), 0);
+            const avgRating = classes.length > 0
+                ? (classes.reduce((sum, c) => sum + (c.stats?.averageRating || 0), 0) / classes.length).toFixed(1)
+                : '0.0';
+
+            document.getElementById('total-classes').textContent = total;
+            document.getElementById('active-classes').textContent = active;
+            document.getElementById('total-students').textContent = students;
+            document.getElementById('avg-rating').textContent = avgRating;
+        }
+
+        // Display classes
+        function displayClasses(classes) {
+            const filtered = currentFilter === 'all' 
+                ? classes 
+                : classes.filter(c => c.status === currentFilter);
+
+            const container = document.getElementById('classes-list');
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📚</div>
+                        <p>No ${currentFilter === 'all' ? '' : currentFilter} classes yet.</p>
+                        <button class="btn btn-edit" onclick="window.location.href='post-class.html'" style="margin-top: 20px;">
+                            Post Your First Class
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(c => `
+                <div class="class-card-item">
+                    <div class="class-header">
+                        <div>
+                            <div class="class-title-text">${c.className}</div>
+                            <span style="color: #8B4513; font-size: 14px; font-weight: 600;">${c.skill}</span>
+                        </div>
+                        <span class="class-badge ${c.status === 'published' ? 'badge-published' : 'badge-draft'}">
+                            ${c.status}
+                        </span>
+                    </div>
+
+                    <p style="color: #654321; margin: 15px 0; line-height: 1.6;">
+                        ${c.description.substring(0, 150)}${c.description.length > 150 ? '...' : ''}
+                    </p>
+
+                    <div class="class-meta-grid">
+                        <div class="class-meta-item">
+                            <span>📅</span>
+                            <span>${new Date(c.schedule.date).toLocaleDateString()}</span>
+                        </div>
+                        <div class="class-meta-item">
+                            <span>⏰</span>
+                            <span>${c.schedule.startTime} - ${c.schedule.endTime}</span>
+                        </div>
+                        <div class="class-meta-item">
+                            <span>👥</span>
+                            <span>${c.currentEnrollment || 0}/${c.maxStudents} students</span>
+                        </div>
+                        <div class="class-meta-item">
+                            <span>💰</span>
+                            <span>Rs ${c.pricing.amount}</span>
+                        </div>
+                    </div>
+
+                    <div class="class-actions-btns">
+                        <button class="btn btn-view" onclick="viewClass('${c._id}')">View Details</button>
+                        <button class="btn btn-edit" onclick="editClass('${c._id}')">Edit</button>
+                        ${c.status === 'draft' ? `<button class="btn btn-view" onclick="publishClass('${c._id}')">Publish</button>` : ''}
+                        <button class="btn btn-delete" onclick="deleteClass('${c._id}', '${c.className}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentFilter = e.target.dataset.filter;
+                displayClasses(allClasses);
+            });
+        });
+
+        // Class actions
+        function viewClass(id) {
+            window.location.href = `class-details.html?id=${id}`;
+        }
+
+        function editClass(id) {
+            window.location.href = `edit-class.html?id=${id}`;
+        }
+
+        async function publishClass(id) {
+            if (!confirm('Publish this class?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/classes/${id}/publish`, { method: 'PATCH' });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Class published!');
+                    loadTeacherData();
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function deleteClass(id, name) {
+            if (!confirm(`Delete "${name}"?`)) return;
+            try {
+                const res = await fetch(`${API_URL}/api/classes/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Class deleted!');
+                    loadTeacherData();
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function editProfile() {
+            openEditProfile();
+        }
+
+        function scrollToReviews() {
+            document.getElementById('reviews-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        });
+
+        // Post a class modal
+        const postClassModal = document.getElementById('post-class-modal');
+        const openPostClassBtn = document.getElementById('open-post-class');
+        const closePostClassBtn = document.getElementById('close-post-class');
+        const cancelPostClassBtn = document.getElementById('cancel-post-class');
+        const postClassForm = document.getElementById('post-class-form');
+        const postClassMessage = document.getElementById('post-class-message');
+        const isRecurringEl = document.getElementById('isRecurring');
+        const recurringWrap = document.getElementById('recurring-wrap');
+        const locationTypeEl = document.getElementById('locationType');
+        const addressWrap = document.getElementById('address-wrap');
+
+        function openPostClass() {
+            postClassMessage.textContent = '';
+            postClassMessage.className = 'form-message';
+            postClassModal.classList.add('open');
+            postClassModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closePostClass() {
+            postClassModal.classList.remove('open');
+            postClassModal.setAttribute('aria-hidden', 'true');
+        }
+
+        function getCheckedValues(name) {
+            return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map((el) => el.value);
+        }
+
+        function csvToList(value) {
+            return String(value || '')
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean);
+        }
+
+        function calcDurationMinutes(startTime, endTime) {
+            const [sh, sm] = String(startTime || '').split(':').map(Number);
+            const [eh, em] = String(endTime || '').split(':').map(Number);
+            if ([sh, sm, eh, em].some((n) => Number.isNaN(n))) return null;
+            return (eh * 60 + em) - (sh * 60 + sm);
+        }
+
+        function syncRecurringUI() {
+            const isRecurring = isRecurringEl.value === 'true';
+            recurringWrap.style.display = isRecurring ? 'block' : 'none';
+        }
+
+        function syncLocationUI() {
+            const isCustom = locationTypeEl.value === 'custom';
+            addressWrap.style.display = isCustom ? 'block' : 'none';
+        }
+
+        openPostClassBtn?.addEventListener('click', openPostClass);
+        closePostClassBtn?.addEventListener('click', closePostClass);
+        cancelPostClassBtn?.addEventListener('click', closePostClass);
+        postClassModal?.addEventListener('click', (e) => {
+            if (e.target === postClassModal) closePostClass();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && postClassModal.classList.contains('open')) closePostClass();
+        });
+        isRecurringEl?.addEventListener('change', syncRecurringUI);
+        locationTypeEl?.addEventListener('change', syncLocationUI);
+        syncRecurringUI();
+        syncLocationUI();
+
+        postClassForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            postClassMessage.textContent = 'Saving class...';
+            postClassMessage.className = 'form-message';
+
+            const teacherId = localStorage.getItem('userId');
+            if (!teacherId) {
+                postClassMessage.textContent = 'Missing teacher id. Please log in again.';
+                postClassMessage.className = 'form-message error';
+                return;
+            }
+
+            const fd = new FormData(postClassForm);
+            const startTime = fd.get('startTime');
+            const endTime = fd.get('endTime');
+            const durationMinutes = calcDurationMinutes(startTime, endTime);
+            if (durationMinutes == null || durationMinutes <= 0) {
+                postClassMessage.textContent = 'End time must be after start time.';
+                postClassMessage.className = 'form-message error';
+                return;
+            }
+
+            const isRecurring = fd.get('isRecurring') === 'true';
+            const recurringDays = isRecurring ? getCheckedValues('recurringDays') : [];
+
+            const payload = {
+                teacherId,
+                className: fd.get('className'),
+                description: fd.get('description'),
+                skill: fd.get('skill'),
+                schedule: {
+                    date: fd.get('date'),
+                    isRecurring,
+                    recurringDays,
+                    endDate: isRecurring ? (fd.get('endDate') || undefined) : undefined,
+                    startTime,
+                    endTime,
+                    durationMinutes
+                },
+                studentLevel: fd.get('studentLevel'),
+                minStudents: fd.get('minStudents') ? Number(fd.get('minStudents')) : 1,
+                maxStudents: Number(fd.get('maxStudents')),
+                ageGroup: getCheckedValues('ageGroup'),
+                pricing: {
+                    amount: Number(fd.get('amount')),
+                    currency: fd.get('currency') || 'NPR',
+                    priceType: fd.get('priceType') || 'per-class'
+                },
+                location: {
+                    type: fd.get('locationType'),
+                    address: fd.get('locationType') === 'custom' ? (fd.get('address') || '') : ''
+                },
+                requirements: fd.get('requirements') || '',
+                materials: csvToList(fd.get('materials')),
+                tags: csvToList(fd.get('tags'))
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/api/classes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || data.success === false) {
+                    throw new Error(data.message || 'Failed to save class');
+                }
+
+                // Optionally publish
+                const publishNow = fd.get('publishNow') === 'true';
+                if (publishNow && data.class && data.class._id) {
+                    const pubRes = await fetch(`${API_URL}/api/classes/${data.class._id}/publish`, { method: 'PATCH' });
+                    const pubData = await pubRes.json().catch(() => ({}));
+                    if (!pubRes.ok || pubData.success === false) {
+                        throw new Error(pubData.message || 'Class saved but publish failed');
+                    }
+                }
+
+                postClassMessage.textContent = '✅ Class saved successfully!';
+                postClassMessage.className = 'form-message success';
+
+                postClassForm.reset();
+                document.getElementById('currency').value = 'NPR';
+                document.getElementById('isRecurring').value = 'false';
+                syncRecurringUI();
+                syncLocationUI();
+
+                // Refresh list/stats and close
+                await loadTeacherData();
+                setTimeout(() => closePostClass(), 400);
+            } catch (err) {
+                postClassMessage.textContent = err.message || 'Something went wrong';
+                postClassMessage.className = 'form-message error';
+            }
+        });
+
+        // Edit profile modal
+        const editProfileModal = document.getElementById('edit-profile-modal');
+        const closeEditProfileBtn = document.getElementById('close-edit-profile');
+        const cancelEditProfileBtn = document.getElementById('cancel-edit-profile');
+        const editProfileForm = document.getElementById('edit-profile-form');
+        const editProfileMessage = document.getElementById('edit-profile-message');
+
+        function openEditProfile() {
+            editProfileMessage.textContent = '';
+            editProfileMessage.className = 'form-message';
+            editProfileModal.classList.add('open');
+            editProfileModal.setAttribute('aria-hidden', 'false');
+            fillEditProfileFormFromDashboard();
+        }
+
+        function closeEditProfile() {
+            editProfileModal.classList.remove('open');
+            editProfileModal.setAttribute('aria-hidden', 'true');
+        }
+
+        function setProfileImage(previewValue) {
+            const el = document.getElementById('profile-image');
+            if (!el) return;
+            if (previewValue && String(previewValue).startsWith('data:image')) {
+                el.innerHTML = `<img class="profile-image" src="${previewValue}" alt="Profile picture" />`;
+            } else if (previewValue && (String(previewValue).startsWith('http://') || String(previewValue).startsWith('https://'))) {
+                el.innerHTML = `<img class="profile-image" src="${previewValue}" alt="Profile picture" />`;
+            } else {
+                // fallback emoji
+                el.textContent = '👨‍🏫';
+            }
+        }
+
+        function fillEditProfileFormFromDashboard() {
+            const userId = localStorage.getItem('userId');
+            const userName = localStorage.getItem('userName');
+            document.getElementById('profileName').value = userName || '';
+
+            // Pull latest from API (preferred)
+            if (!userId) return;
+            fetch(`${API_URL}/api/users/${userId}`)
+                .then((r) => r.json())
+                .then((json) => {
+                    if (!json || json.success === false || !json.user) return;
+                    const u = json.user;
+                    document.getElementById('profileName').value = u.name || '';
+                    document.getElementById('profilePhone').value = u.phone || '';
+                    document.getElementById('profileBio').value = u.bio || '';
+                    document.getElementById('profileExperience').value = u.experience || '';
+                    document.getElementById('profileRate').value = u.sessionRate ?? '';
+                    document.getElementById('profileSkills').value = Array.isArray(u.skills) ? u.skills.join(', ') : '';
+                    document.getElementById('profileCity').value = u.location?.city || '';
+                    document.getElementById('profileAddress').value = u.location?.address || '';
+                    document.getElementById('profileLat').value = u.location?.coordinates?.latitude ?? '';
+                    document.getElementById('profileLng').value = u.location?.coordinates?.longitude ?? '';
+                })
+                .catch(() => {});
+        }
+
+        function fileToDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        closeEditProfileBtn?.addEventListener('click', closeEditProfile);
+        cancelEditProfileBtn?.addEventListener('click', closeEditProfile);
+        editProfileModal?.addEventListener('click', (e) => {
+            if (e.target === editProfileModal) closeEditProfile();
+        });
+
+        document.getElementById('profilePic')?.addEventListener('change', async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            if (file.size > 2.5 * 1024 * 1024) {
+                editProfileMessage.textContent = 'Image is too large. Please upload under 2.5MB.';
+                editProfileMessage.className = 'form-message error';
+                e.target.value = '';
+                return;
+            }
+            try {
+                const dataUrl = await fileToDataUrl(file);
+                // store preview in a dataset until submit
+                e.target.dataset.dataUrl = String(dataUrl);
+            } catch {
+                editProfileMessage.textContent = 'Could not read image.';
+                editProfileMessage.className = 'form-message error';
+            }
+        });
+
+        editProfileForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            editProfileMessage.textContent = 'Saving profile...';
+            editProfileMessage.className = 'form-message';
+
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                editProfileMessage.textContent = 'Missing user id. Please log in again.';
+                editProfileMessage.className = 'form-message error';
+                return;
+            }
+
+            const fd = new FormData(editProfileForm);
+            const skills = csvToList(fd.get('skills'));
+            const profilePicInput = document.getElementById('profilePic');
+            const pictureDataUrl = profilePicInput?.dataset?.dataUrl;
+
+            const payload = {
+                name: fd.get('name'),
+                phone: fd.get('phone'),
+                bio: fd.get('bio'),
+                experience: fd.get('experience'),
+                sessionRate: fd.get('sessionRate') ? Number(fd.get('sessionRate')) : 0,
+                skills,
+                location: {
+                    city: fd.get('city') || '',
+                    address: fd.get('address') || '',
+                    coordinates: {
+                        latitude: fd.get('latitude') !== '' ? Number(fd.get('latitude')) : undefined,
+                        longitude: fd.get('longitude') !== '' ? Number(fd.get('longitude')) : undefined
+                    }
+                },
+                ...(pictureDataUrl ? { profilePicture: pictureDataUrl } : {})
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/api/users/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || data.success === false) {
+                    throw new Error(data.message || 'Failed to update profile');
+                }
+
+                // Update UI + localStorage
+                localStorage.setItem('userName', data.user?.name || payload.name || 'Teacher');
+                document.getElementById('teacher-name').textContent = data.user?.name || payload.name || 'Teacher';
+                document.getElementById('teacher-bio').textContent = data.user?.bio || payload.bio || '';
+                document.getElementById('teacher-experience').textContent = data.user?.experience || payload.experience || 'Experience';
+                document.getElementById('teacher-rate').textContent = String(data.user?.sessionRate ?? payload.sessionRate ?? 0);
+                document.getElementById('teacher-location').textContent =
+                    data.user?.location?.city || data.user?.location?.address || payload.location.city || payload.location.address || 'Location';
+
+                const skillsEl = document.getElementById('teacher-skills');
+                const updatedSkills = Array.isArray(data.user?.skills) ? data.user.skills : skills;
+                if (skillsEl) {
+                    skillsEl.innerHTML = (updatedSkills?.length ? updatedSkills : ['Add your skills in profile'])
+                        .map((s) => `<li>${String(s)}</li>`)
+                        .join('');
+                }
+
+                if (data.user?.profilePicture || pictureDataUrl) {
+                    setProfileImage(data.user?.profilePicture || pictureDataUrl);
+                }
+
+                editProfileMessage.textContent = '✅ Profile updated!';
+                editProfileMessage.className = 'form-message success';
+
+                // Clear stored preview
+                if (profilePicInput?.dataset) delete profilePicInput.dataset.dataUrl;
+                editProfileForm.reset();
+
+                setTimeout(() => closeEditProfile(), 450);
+            } catch (err) {
+                editProfileMessage.textContent = err.message || 'Something went wrong';
+                editProfileMessage.className = 'form-message error';
+            }
+        });
+
+        // Load data
+        document.getElementById('year').textContent = new Date().getFullYear();
+        loadTeacherData();
     </script>
-  </body>
+</body>
 </html>
